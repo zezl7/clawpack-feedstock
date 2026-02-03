@@ -1,5 +1,5 @@
 {% set name = "clawpack" %}
-{% set version = "5.9.0" %}
+{% set version = "5.14.0" %}
 {% set setup_py = "setup.py" %}
 {% set pyproject_toml = "pyproject.toml" %}
 
