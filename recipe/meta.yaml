@@ -21,13 +21,13 @@ build:
 
 requirements:
   host:
-    - python >=3.6
+    - python
     - pip
     - setuptools
     - wheel
     - numpy
   run:
-    - python >=3.6
+    - python
     - numpy
     - matplotlib-base
     - six
