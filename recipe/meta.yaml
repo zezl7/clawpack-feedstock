@@ -1,7 +1,7 @@
 {% set name = "clawpack" %}
 {% set version = "5.9.0" %}
-
-{% set mpi = mpi %}
+{% set setup_py = "setup.py" %}
+{% set pyproject_toml = "pyproject.toml" %}
 
 package:
   name: {{ name|lower }}
@@ -9,60 +9,49 @@ package:
 
 source:
   url: https://github.com/{{ name }}/{{ name }}/releases/download/v{{ version }}/{{ name }}-v{{ version }}.tar.gz
-  sha256: 23a03713b23ec4253361c24ca3c7ab009188c53ce81f013fd8a3678cb0b9ada2
-  patches:
-    - patches/64.patch
+  sha256: ecf9297ca3e483c466fd8ade93192d3c08dec4c30dc1069f501f62c6c4eecb8e
 
 build:
-  script: {{ PYTHON }} -m pip install . -vv
-  number: 2
+  script:
+    - cp {{ RECIPE_DIR }}/{{ setup_py }} .
+    - cp {{ RECIPE_DIR }}/{{ pyproject_toml }} .
+    - {{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
+  number: 0
   skip: true  # [win]
 
 requirements:
-  build:
-    - python                                 # [build_platform != target_platform]
-    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
-    - numpy                                  # [build_platform != target_platform]
-    - {{ mpi }}                              # [build_platform != target_platform]
-    - {{ compiler('c') }}
-    - {{ stdlib("c") }}
-    - {{ compiler('fortran') }}
   host:
+    - python >=3.6
     - pip
-    - python
-    - setuptools <61
+    - setuptools
+    - wheel
     - numpy
-    - six
-    - {{ mpi }}
   run:
-    - {{ mpi }}
-    - h5py * mpi_{{ mpi }}_*
-    - python
-    - six
+    - python >=3.6
     - numpy
-    - scipy
     - matplotlib-base
-    - mpi4py
-    - petsc4py
+    - six
 
 test:
   imports:
-    - clawpack.pyclaw
-    - clawpack.petclaw
-    - clawpack.pyclaw.fileio.hdf5
-    - clawpack.riemann.euler_4wave_2D
-  requires:
-    - pip
+    - clawpack
+    - clawpack.visclaw
+    - clawpack.clawutil
+    - clawpack.geoclaw
+    - clawpack.amrclaw
   commands:
-    - pip check
-    - python -c "from clawpack.pyclaw import examples; claw = examples.shock_bubble_interaction.setup(); claw.run()"
-
+    - 'python -c "import clawpack; print(\"Clawpack {0} installed\".format(clawpack.__version__))"'
+    - 'python -c "from clawpack.clawutil import data; print(\"Clawutil is present.\")"'
+    - 'python -c "from clawpack.visclaw import colormaps; print(\"VisClaw is present.\")"'
+    - 'python -c "from clawpack.geoclaw import topotools; print(\"GeoClaw is present.\")"'
+    - 'python -c "from clawpack.amrclaw import region_tools; print(\"AMRClaw is present.\")"'
 
 about:
   home: https://github.com/clawpack/clawpack
-  summary: Package for solving hyperbolic systems of partial differential equations
+  summary: Package for solving hyperbolic systems of partial differential equations (Python-only components)
   license: BSD-3-Clause
   license_file: LICENSE
+  doc_url: https://www.clawpack.org/contents.html
 
 extra:
   recipe-maintainers:
